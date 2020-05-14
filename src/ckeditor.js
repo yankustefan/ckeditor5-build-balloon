@@ -28,6 +28,8 @@ import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefrom
 // import Table from '@ckeditor/ckeditor5-table/src/table';
 // import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 
+import RemoveFormat from '@ckeditor/ckeditor5-remove-format/src/removeformat';
+
 import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
 import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
 import Underline from '@ckeditor/ckeditor5-basic-styles/src/underline';
@@ -65,7 +67,7 @@ BalloonEditor.builtinPlugins = [
 	List,
 	// MediaEmbed,
 	Paragraph,
-	PasteFromOffice,
+	// PasteFromOffice,
 	// Table,
 	// TableToolbar
 	// Added Plugins:
@@ -74,6 +76,7 @@ BalloonEditor.builtinPlugins = [
 	Strikethrough,
 	Subscript,
 	Superscript,
+	RemoveFormat,
 	//
 	// taConvertTagToStyle,
 	disableEnter,
@@ -108,7 +111,8 @@ BalloonEditor.defaultConfig = {
 			// 'insertTable',
 			// 'mediaEmbed',
 			'undo',
-			'redo'
+			'redo',
+			'removeFormat'
 		]
 	},
 	// This value must be kept in sync with the language defined in webpack.config.js.
