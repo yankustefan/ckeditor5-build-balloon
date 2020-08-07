@@ -1,0 +1,1 @@
+!function(r){const e=r.af=r.af||{};e.dictionary=Object.assign(e.dictionary||{},{Bold:"Vetgedruk",Italic:"Skuinsgedruk","Remove color":"","Remove Format":"Verwyder formatering",Strikethrough:"Deurgetrek",Subscript:"Onderskrif",Superscript:"Boskrif",Underline:"Onderstreep"}),e.getPluralForm=function(r){return 1!=r}}(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));
