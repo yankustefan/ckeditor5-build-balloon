@@ -1,5 +1,5 @@
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
-export default class allowAttribute extends Plugin {
+export default class allowLrefAttribute extends Plugin {
 	init() {
 		const editor = this.editor;
 

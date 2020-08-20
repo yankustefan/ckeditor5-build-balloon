@@ -39,7 +39,6 @@ export default class textColorButtons extends Plugin {
 	  }
 	];
 
-
 	const fontColorCommand = 'fontColor';
 
 	colors.forEach( ( color, index ) => {

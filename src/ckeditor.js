@@ -20,37 +20,38 @@ import Indent from '@ckeditor/ckeditor5-indent/src/indent';
 import List from '@ckeditor/ckeditor5-list/src/list';
 
 import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
-import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice';
 
 import Font from '@ckeditor/ckeditor5-font/src/font';
 import RemoveFormat from '@ckeditor/ckeditor5-remove-format/src/removeformat';
 
 import wrapTextInSpan from './plugins/wrapTextInSpan.js';
-import allowAttribute from './plugins/allowAttribute.js';
 import textColorButtons from './plugins/textColorButtons.js';
+import convertTagToStyle from './plugins/convertTagToStyle';
+import handleStyles from './plugins/handleStyles';
+import allowLrefAttribute from './plugins/allowLrefAttribute';
 
 export default class BalloonEditor extends BalloonEditorBase {
 }
 
 // Plugins to include in the build.
 BalloonEditor.builtinPlugins = [
-  Essentials,
-  Bold,
-  Italic,
-  Indent,
-  List,
-  Paragraph,
-  PasteFromOffice,
-
-  Underline,
-  Strikethrough,
-  Subscript,
-  Superscript,
-  RemoveFormat,
-  textColorButtons,
-  wrapTextInSpan,
-  allowAttribute,
-  Font
+	Essentials,
+	Bold,
+	Italic,
+	Indent,
+	List,
+	Paragraph,
+	Underline,
+	Strikethrough,
+	Subscript,
+	Superscript,
+	RemoveFormat,
+	Font,
+	convertTagToStyle,
+	handleStyles,
+	textColorButtons,
+	wrapTextInSpan,
+	allowLrefAttribute
 ];
 
 // Editor configuration.
