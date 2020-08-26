@@ -3,21 +3,32 @@ import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 export default class convertTagToStyle extends Plugin {
 	init() {
 		const editor = this.editor;
+		const conversion = this.editor.conversion;
 
 		// Italic
-		editor.conversion.attributeToElement( {
-			model: 'italic',
+		// Overwrite default handling for italic; style.
+		// Add an upcast (view-to-model) converter for italic/font-style:italic attribute of a span.
+		conversion.for( 'upcast' ).elementToAttribute( {
 			view: {
 				name: 'span',
 				styles: {
 					'font-style': 'italic'
 				}
 			},
+			model: {
+				key: 'italic',
+				value: viewElement => {
+					const fontStyle = viewElement.getStyle( 'font-style' );
+					if ( fontStyle && fontStyle === 'italic' || fontStyle === 'oblique' ) {
+						return true;
+					}
+				}
+			},
 			upcastAlso: [
 				'i',
+				'em',
 				viewElement => {
 					const fontStyle = viewElement.getStyle( 'font-style' );
-
 					if ( !fontStyle ) {
 						return null;
 					}
@@ -33,26 +44,44 @@ export default class convertTagToStyle extends Plugin {
 			converterPriority: 'high'
 		} );
 
+		// Add an downcast (model-to-view) converter for italic/font-style:italic attribute of a span.
+		conversion.for( 'downcast' ).attributeToElement( {
+			model: 'italic',
+			view: ( modelAttributeValue, viewWriter ) => {
+				return viewWriter.createAttributeElement( 'span', {
+					'style': 'font-style:italic;'
+				}, { priority: 11 } );
+			},
+			converterPriority: 'high'
+		} );
+
 		// Bold
-		editor.conversion.attributeToElement( {
-			model: 'bold',
+		conversion.for( 'upcast' ).elementToAttribute( {
 			view: {
 				name: 'span',
 				styles: {
 					'font-weight': 'bold'
 				}
 			},
+			model: {
+				key: 'bold',
+				value: viewElement => {
+					const fontWeight = viewElement.getStyle( 'font-weight' );
+					if ( fontWeight && fontWeight === 'bold' || Number( fontWeight ) >= 600 ) {
+						return true;
+					}
+				}
+			},
 			upcastAlso: [
-				'i',
+				'b',
+				'strong',
 				viewElement => {
 					const fontWeight = viewElement.getStyle( 'font-weight' );
-
 					if ( !fontWeight ) {
 						return null;
 					}
 
-					// Value of the `font-weight` attribute can be defined as a string or a number.
-					if ( fontWeight === 'bold' || Number( fontWeight ) >= 600 ) {
+					if ( fontWeight && fontWeight === 'bold' || Number( fontWeight ) >= 600 ) {
 						return {
 							name: true,
 							styles: [ 'font-weight' ]
@@ -63,10 +92,20 @@ export default class convertTagToStyle extends Plugin {
 			converterPriority: 'high'
 		} );
 
+		conversion.for( 'downcast' ).attributeToElement( {
+			model: 'bold',
+			view: ( modelAttributeValue, viewWriter ) => {
+				return viewWriter.createAttributeElement( 'span', {
+					'style': 'font-weight:bold;'
+				}, { priority: 11 } );
+			},
+			converterPriority: 'high'
+		} );
+
 		// Underline
 		editor.model.schema.extend( '$text', { allowAttributes: 'underline' } );
 
-		editor.conversion.for( 'upcast' ).attributeToAttribute( {
+		conversion.for( 'upcast' ).attributeToAttribute( {
 			model: {
 				key: 'underline',
 				value: viewElement => {
@@ -81,18 +120,18 @@ export default class convertTagToStyle extends Plugin {
 			}
 		}, { priority: 'high' } );
 
-		editor.conversion.for( 'downcast' ).attributeToElement( {
+		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'underline',
 			view: ( attributeValue, writer ) => {
 				const value = (
 					attributeValue === true
 				) ? 'underline' : attributeValue;
-				return writer.createAttributeElement( 'span', { style: 'text-decoration:' + value } );
+				return writer.createAttributeElement( 'span', { style: 'text-decoration:' + value }, { priority: 11 } );
 			},
 			converterPriority: 'high'
 		} );
 
-		editor.conversion.for( 'downcast' ).attributeToElement( {
+		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'u',
 			view: ( attributeValue, writer ) => {
 				const value = (
@@ -107,7 +146,7 @@ export default class convertTagToStyle extends Plugin {
 
 		editor.model.schema.extend( '$text', { allowAttributes: 'strikethrough' } );
 
-		editor.conversion.for( 'upcast' ).attributeToAttribute( {
+		conversion.for( 'upcast' ).attributeToAttribute( {
 			model: {
 				key: 'strikethrough',
 				value: viewElement => {
@@ -122,25 +161,25 @@ export default class convertTagToStyle extends Plugin {
 			}
 		}, { priority: 'high' } );
 
-		editor.conversion.for( 'downcast' ).attributeToElement( {
+		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'strikethrough',
 			view: ( attributeValue, writer ) => {
 				const value = (
 					attributeValue === true ||
 					attributeValue === 'line-through'
 				) ? 'line-through solid' : attributeValue;
-				return writer.createAttributeElement( 'span', { style: 'text-decoration:' + value } );
+				return writer.createAttributeElement( 'span', { style: 'text-decoration:' + value }, { priority: 11 } );
 			}
 		}, { priority: 'high' } );
 
-		editor.conversion.for( 'downcast' ).attributeToElement( {
+		conversion.for( 'downcast' ).attributeToElement( {
 			model: 's',
 			view: ( attributeValue, writer ) => {
 				const value = (
 					attributeValue === true ||
 					attributeValue === 'line-through'
 				) ? 'line-through solid' : attributeValue;
-				return writer.createAttributeElement( 'span', { style: 'text-decoration: ' + value } );
+				return writer.createAttributeElement( 'span', { style: 'text-decoration: ' + value }, { priority: 11 } );
 			}
 		}, { priority: 'high' } );
 	}

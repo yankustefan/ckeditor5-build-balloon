@@ -6,16 +6,50 @@ import { calculateRgbBrightness, convertToHex, convertToRGB } from './colorTools
 export default class handleStyles extends Plugin {
 	init() {
 		const editor = this.editor;
+		const conversion = editor.conversion;
 
 		// allow any style
 		editor.model.schema.extend( '$text', {
 			allowAttributes: [
-				'spanFontColor',
 				'spanStyles'
 			]
 		} );
 
-		editor.conversion.for( 'upcast' ).attributeToAttribute( {
+		// Overwrite default handling for color style.
+		//  Add an upcast (view-to-model) converter for fontColor/color attribute of a span.
+		conversion.for( 'upcast' ).attributeToAttribute( {
+			view: {
+				name: 'span',
+				styles: {
+					'background-color': /[\s\S]+/
+				}
+			},
+			model: {
+				key: 'fontBackgroundColor',
+				value: viewElement => {
+					return viewElement.getStyle( 'background-color' );
+				}
+			},
+			converterPriority: 'high'
+		} );
+
+		// Add an downcast (model-to-view) converter for fontColor/color attribute of a span.
+
+		conversion.for( 'downcast' ).attributeToElement( {
+			model: 'fontBackgroundColor',
+			view: ( modelAttributeValue, viewWriter ) => {
+				// console.log('downcast - backgroundColor',modelAttributeValue);
+				// #auto
+				return viewWriter.createAttributeElement( 'span', {
+					style: `background-color:${ ( modelAttributeValue ) ? convertToHex( modelAttributeValue ) : null }`
+				}, { priority: 11 } );
+			},
+			converterPriority: 'high'
+		} );
+
+		// Overwrite default handling for color style.
+		//  Add an upcast (view-to-model) converter for fontColor/color attribute of a span.
+		conversion.for( 'upcast' ).attributeToAttribute( {
 			view: {
 				name: 'span',
 				styles: {
@@ -23,7 +57,7 @@ export default class handleStyles extends Plugin {
 				}
 			},
 			model: {
-				key: 'spanFontColor',
+				key: 'fontColor',
 				value: viewElement => {
 					return viewElement.getStyle( 'color' );
 				}
@@ -31,23 +65,25 @@ export default class handleStyles extends Plugin {
 			converterPriority: 'high'
 		} );
 
-		editor.conversion.for( 'dataDowncast' ).attributeToElement( {
-			model: 'spanFontColor',
+		// Add an downcast (model-to-view) converter for fontColor/color attribute of a span.
+
+		conversion.for( 'dataDowncast' ).attributeToElement( {
+			model: 'fontColor',
 			view: ( modelAttributeValue, viewWriter ) => {
 				return viewWriter.createAttributeElement( 'span', {
 					style: `color:${ ( modelAttributeValue ) ? convertToHex( modelAttributeValue ) : null }`
-				}, { priority: 7 } );
+				}, { priority: 11 } );
 			},
 			converterPriority: 'high'
 		} );
 
-		editor.conversion.for( 'editingDowncast' ).attributeToElement( {
-			model: 'spanFontColor',
+		conversion.for( 'editingDowncast' ).attributeToElement( {
+			model: 'fontColor',
 			view: ( modelAttributeValue, viewWriter ) => {
 				const newValue = ( modelAttributeValue ) ? convertToHex( modelAttributeValue ) : null;
 				const element = viewWriter.createAttributeElement( 'span', {
 					style: `color:${ ( modelAttributeValue ) ? convertToHex( modelAttributeValue ) : null }`
-				}, { priority: 7 } );
+				}, { priority: 11 } );
 				if ( newValue ) {
 					const brightness = calculateRgbBrightness( convertToRGB( modelAttributeValue ) );
 					if ( brightness > 220 ) {
@@ -59,8 +95,71 @@ export default class handleStyles extends Plugin {
 			converterPriority: 'high'
 		} );
 
+		// font size
+		/**/
+		conversion.for( 'upcast' ).attributeToAttribute( {
+			view: {
+				name: 'span',
+				styles: {
+					'font-size': /[\s\S]+/
+				}
+			},
+			model: {
+				key: 'fontSize',
+				value: viewElement => {
+					return viewElement.getStyle( 'font-size' );
+				}
+			},
+			converterPriority: 'high'
+		} );
+
+		conversion.for( 'dataDowncast' ).attributeToElement( {
+			model: 'fontSize',
+			view: ( modelAttributeValue, viewWriter ) => {
+				return viewWriter.createAttributeElement( 'span', {
+					style: `font-size:${ modelAttributeValue }`
+				}, { priority: 11 } );
+			},
+			converterPriority: 'high'
+		} );
+
+		conversion.for( 'editingDowncast' ).attributeToElement( {
+			model: 'fontSize',
+			view: ( modelAttributeValue, viewWriter ) => {
+				const element = viewWriter.createAttributeElement(
+					'span',
+					{
+						style: `font-size:${ modelAttributeValue }`
+					},
+					{ priority: 11 }
+				);
+				if (
+					modelAttributeValue
+				) {
+					const sizeValue = parseInt( modelAttributeValue );
+					if ( sizeValue ) {
+						let sizeClassName;
+						if ( sizeValue <= 16 ) {
+							sizeClassName = 'ta-font-size-medium';
+						} else if ( sizeValue <= 20 ) {
+							sizeClassName = 'ta-font-size-l';
+						} else if ( sizeValue <= 24 ) {
+							sizeClassName = 'ta-font-size-xl';
+						} else {
+							sizeClassName = 'ta-font-size-xxl';
+						}
+						if ( sizeClassName ) {
+							viewWriter.addClass( sizeClassName, element );
+						}
+					}
+				}
+				return element;
+			},
+			converterPriority: 'high'
+		} );
+
 		// Add an upcast (view-to-model) converter for style attribute of a span.
-		editor.conversion.for( 'upcast' )
+		conversion.for( 'upcast' )
 			.elementToAttribute( {
 				view: {
 					name: 'span',
@@ -70,7 +169,7 @@ export default class handleStyles extends Plugin {
 					key: 'spanStyles',
 					value: viewElement => {
 						const styles = viewElement.getStyle();
-						// filter out color style, to avoid duplicates ('cause color is handled natively)
+						// Filter out color and italic  style, to avoid duplicates as these styles are handled by editor plugins.
 						if (
 							styles &&
 							(
@@ -104,59 +203,22 @@ export default class handleStyles extends Plugin {
 			} );
 
 		// Add a downcast (model-to-view) converter for style attribute of a span.
-		editor.conversion.for( 'dataDowncast' ).attributeToElement( {
+		// This attribute should support all the styles not supported by native plugins
+		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'spanStyles',
 			view: ( modelAttributeValue, viewWriter ) => {
 				const element = viewWriter.createAttributeElement(
 					'span',
 					{
 						'style': `${ modelAttributeValue }`
-					}
+					},
+					{ priority: 11 }
 				);
 				return element;
 			},
 			converterPriority: 'high'
 		} );
 
-		editor.conversion.for( 'editingDowncast' ).attributeToElement( {
-			model: 'spanStyles',
-			view: ( modelAttributeValue, viewWriter ) => {
-				const styleValue = ( modelAttributeValue ) ? modelAttributeValue.match( /font-size:\s?(.+?);/ ) : null;
-
-				const element = viewWriter.createAttributeElement(
-					'span',
-					{
-						'style': `${ modelAttributeValue }`
-					}
-				);
-
-				if (
-					styleValue &&
-					styleValue[ 0 ] &&
-					styleValue[ 1 ]
-				) {
-					const sizeValue = parseInt( styleValue[ 1 ] );
-					let sizeClassName;
-
-					if ( sizeValue <= 16 ) {
-						sizeClassName = 'ta-font-size-medium';
-					} else if ( sizeValue <= 20 ) {
-						sizeClassName = 'ta-font-size-l';
-					} else if ( sizeValue <= 24 ) {
-						sizeClassName = 'ta-font-size-xl';
-					} else {
-						sizeClassName = 'ta-font-size-xxl';
-					}
-
-					if ( sizeClassName ) {
-						viewWriter.addClass( sizeClassName, element );
-					}
-				}
-
-				return element;
-			},
-			converterPriority: 'high'
-		} );
 	}
 }
 

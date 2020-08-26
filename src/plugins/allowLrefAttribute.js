@@ -1,29 +1,37 @@
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+
 export default class allowLrefAttribute extends Plugin {
 	init() {
 		const editor = this.editor;
+		const conversion = editor.conversion;
 
 		// Allow the "dataLref" attribute in the editor model.
 		editor.model.schema.extend( '$text', { allowAttributes: 'dataLref' } );
 
-		// Tell the editor that the model "dataLref" attribute converts into <a target="..."></a>
-		editor.conversion.for( 'downcast' ).attributeToElement( {
-			model: 'dataLref',
-			view: ( attributeValue, writer ) => {
-				const element = writer.createAttributeElement( 'span', { 'data-lref': attributeValue }, { priority: 5 } );
-				return element;
-			},
-			converterPriority: 'low'
-		} );
-
-		// Tell the editor that <span data-lref="..."></span> converts into the "dataLref" attribute in the model.
-		editor.conversion.for( 'upcast' ).attributeToAttribute( {
+		// Add an upacast (view-to-model) converter for 'data-lref' attribute of a span.
+		conversion.for( 'upcast' ).attributeToAttribute( {
 			view: {
 				name: 'span',
-				key: 'data-lref'
+				attributes: { 'data-lref': true }
 			},
+			model: {
+				key: 'dataLref',
+				value: viewElement => viewElement.getAttribute( 'data-lref' )
+			},
+			converterPriority: 'high'
+		} );
+
+		// Add an downcast (model-to-view) converter for 'data-lref' attribute of a span.
+		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'dataLref',
-			converterPriority: 'low'
+			view: ( modelAttributeValue, viewWriter ) => {
+				return viewWriter.createAttributeElement( 'span', {
+						'data-lref': `${ modelAttributeValue }`
+					},
+					// { priority: 11 }
+				);
+			},
+			converterPriority: 'high'
 		} );
 
 	}

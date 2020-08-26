@@ -30,6 +30,26 @@ import convertTagToStyle from './plugins/convertTagToStyle';
 import handleStyles from './plugins/handleStyles';
 import allowLrefAttribute from './plugins/allowLrefAttribute';
 
+function generateFontSizes() {
+	let sizes = [];
+	while (sizes.length < 100) {
+		const size = sizes.length + 1;
+		sizes.push( {
+			model: size,
+			title: size,
+			view: {
+				name: 'span',
+				styles: {
+					'font-size': `${ size }pt`
+				}
+			}
+		} );
+	}
+
+	return sizes;
+
+}
+
 export default class BalloonEditor extends BalloonEditorBase {
 }
 
@@ -56,32 +76,35 @@ BalloonEditor.builtinPlugins = [
 
 // Editor configuration.
 BalloonEditor.defaultConfig = {
-  toolbar: {
-	items: [
-	  'bold',
-	  'italic',
-	  'underline',
-	  'strikethrough',
-	  '|',
-	  'taFontColorRed',
-	  'taFontColorBlue',
-	  'taFontColorSky',
-	  'taFontColorGreen',
-	  'taFontColorPink',
-	  // 'taFontColorBlack',
-	  'taFontColorRemove',
-	  '|',
-	  'fontColor',
-	  'fontBackgroundColor',
-	  '|',
-	  'subscript',
-	  'superscript',
-	  '|',
-	  'removeFormat',
-	  'undo',
-	  'redo'
-	]
-  },
-  // This value must be kept in sync with the language defined in webpack.config.js.
-  language: 'en'
+	toolbar: {
+		items: [
+			'bold',
+			'italic',
+			'underline',
+			'strikethrough',
+			'|',
+			'taFontColorRed',
+			'taFontColorBlue',
+			'taFontColorSky',
+			'taFontColorGreen',
+			'taFontColorPink',
+			// 'taFontColorBlack',
+			'taFontColorRemove',
+			'|',
+			'fontColor',
+			'fontBackgroundColor',
+			'|',
+			'subscript',
+			'superscript',
+			'|',
+			'removeFormat',
+			'undo',
+			'redo'
+		]
+	},
+	fontSize: {
+		options: generateFontSizes()
+	},
+	// This value must be kept in sync with the language defined in webpack.config.js.
+	language: 'en'
 };
