@@ -7,6 +7,11 @@ export default class textColorButtons extends Plugin {
   init() {
 	const editor = this.editor;
 	const colors = [
+		{
+			key: 'taFontColorOrange',
+			name: 'Orange',
+			value: '#FF9900'
+		},
 	  {
 		key: 'taFontColorRed',
 		name: 'Red',

@@ -1,6 +1,6 @@
 {
   "name": "@stefanyanku/ckeditor5-build-balloon",
-  "version": "21.0.5",
+  "version": "21.0.6",
   "description": "The balloon editor build of CKEditor 5 – the best browser-based rich text editor.",
   "keywords": [],
   "main": "./build/ckeditor.js",
@@ -26,6 +26,7 @@
     "@ckeditor/ckeditor5-remove-format": "^21.0.0",
     "@ckeditor/ckeditor5-theme-lark": "^21.0.0",
     "@ckeditor/ckeditor5-typing": "^21.0.0",
+    "@ckeditor/ckeditor5-special-characters": "^21.0.0",
     "postcss-loader": "^3.0.0",
     "raw-loader": "^4.0.1",
     "style-loader": "^1.2.1",

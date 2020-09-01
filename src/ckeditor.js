@@ -24,6 +24,12 @@ import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import Font from '@ckeditor/ckeditor5-font/src/font';
 import RemoveFormat from '@ckeditor/ckeditor5-remove-format/src/removeformat';
 
+import SpecialCharacters from '@ckeditor/ckeditor5-special-characters/src/specialcharacters';
+import SpecialCharactersCurrency from '@ckeditor/ckeditor5-special-characters/src/specialcharacterscurrency';
+import SpecialCharactersMathematical from '@ckeditor/ckeditor5-special-characters/src/specialcharactersmathematical';
+import SpecialCharactersLatin from '@ckeditor/ckeditor5-special-characters/src/specialcharacterslatin';
+import SpecialCharactersText from '@ckeditor/ckeditor5-special-characters/src/specialcharacterstext';
+
 import wrapTextInSpan from './plugins/wrapTextInSpan.js';
 import textColorButtons from './plugins/textColorButtons.js';
 import convertTagToStyle from './plugins/convertTagToStyle';
@@ -67,6 +73,11 @@ BalloonEditor.builtinPlugins = [
 	Superscript,
 	RemoveFormat,
 	Font,
+	SpecialCharacters,
+	SpecialCharactersCurrency,
+	SpecialCharactersMathematical,
+	SpecialCharactersLatin,
+	SpecialCharactersText,
 	convertTagToStyle,
 	handleStyles,
 	textColorButtons,
@@ -83,13 +94,15 @@ BalloonEditor.defaultConfig = {
 			'underline',
 			'strikethrough',
 			'|',
+			'taFontColorOrange',
 			'taFontColorRed',
 			'taFontColorBlue',
 			'taFontColorSky',
 			'taFontColorGreen',
 			'taFontColorPink',
-			// 'taFontColorBlack',
 			'taFontColorRemove',
+			'|',
+			'specialCharacters',
 			'|',
 			'fontColor',
 			'fontBackgroundColor',
