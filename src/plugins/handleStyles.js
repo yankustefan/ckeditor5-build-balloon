@@ -96,7 +96,7 @@ export default class handleStyles extends Plugin {
 		} );
 
 		// font size
-		/**/
+		/*
 		conversion.for( 'upcast' ).attributeToAttribute( {
 			view: {
 				name: 'span',
@@ -157,6 +157,7 @@ export default class handleStyles extends Plugin {
 			},
 			converterPriority: 'high'
 		} );
+		*/
 
 		// Add an upcast (view-to-model) converter for style attribute of a span.
 		conversion.for( 'upcast' )
