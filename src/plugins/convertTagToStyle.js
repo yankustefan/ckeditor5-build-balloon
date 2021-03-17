@@ -19,7 +19,7 @@ export default class convertTagToStyle extends Plugin {
 				key: 'italic',
 				value: viewElement => {
 					const fontStyle = viewElement.getStyle( 'font-style' );
-					if ( fontStyle && fontStyle === 'italic' || fontStyle === 'oblique' ) {
+					if (fontStyle && fontStyle === 'italic' || fontStyle === 'oblique') {
 						return true;
 					}
 				}
@@ -29,11 +29,11 @@ export default class convertTagToStyle extends Plugin {
 				'em',
 				viewElement => {
 					const fontStyle = viewElement.getStyle( 'font-style' );
-					if ( !fontStyle ) {
+					if (!fontStyle) {
 						return null;
 					}
 
-					if ( fontStyle === 'italic' || fontStyle === 'oblique' ) {
+					if (fontStyle === 'italic' || fontStyle === 'oblique') {
 						return {
 							name: true,
 							styles: [ 'font-style' ]
@@ -67,7 +67,7 @@ export default class convertTagToStyle extends Plugin {
 				key: 'bold',
 				value: viewElement => {
 					const fontWeight = viewElement.getStyle( 'font-weight' );
-					if ( fontWeight && fontWeight === 'bold' || Number( fontWeight ) >= 600 ) {
+					if (fontWeight && fontWeight === 'bold' || Number( fontWeight ) >= 600) {
 						return true;
 					}
 				}
@@ -77,11 +77,11 @@ export default class convertTagToStyle extends Plugin {
 				'strong',
 				viewElement => {
 					const fontWeight = viewElement.getStyle( 'font-weight' );
-					if ( !fontWeight ) {
+					if (!fontWeight) {
 						return null;
 					}
 
-					if ( fontWeight && fontWeight === 'bold' || Number( fontWeight ) >= 600 ) {
+					if (fontWeight && fontWeight === 'bold' || Number( fontWeight ) >= 600) {
 						return {
 							name: true,
 							styles: [ 'font-weight' ]
@@ -113,6 +113,8 @@ export default class convertTagToStyle extends Plugin {
 		// 	converterPriority: 'high'
 		// } );
 
+		const underlineRegex = /^underline(?!.*none.*).*/;
+
 		conversion.for( 'upcast' ).attributeToAttribute( {
 			model: {
 				key: 'underline',
@@ -123,7 +125,7 @@ export default class convertTagToStyle extends Plugin {
 			view: {
 				name: 'span',
 				styles: {
-					'text-decoration': /^underline.*/
+					'text-decoration': underlineRegex
 				}
 			}
 		}, { priority: 'high' } );
@@ -136,7 +138,7 @@ export default class convertTagToStyle extends Plugin {
 					(
 						attributeValue &&
 						typeof attributeValue === 'string' &&
-						attributeValue.startsWith('underline')
+						attributeValue.match( underlineRegex )
 					)
 				) ? 'underline' : attributeValue;
 				return writer.createAttributeElement( 'span', { style: 'text-decoration:' + value }, { priority: 11 } );
@@ -152,7 +154,7 @@ export default class convertTagToStyle extends Plugin {
 					(
 						attributeValue &&
 						typeof attributeValue === 'string' &&
-						attributeValue.startsWith('underline')
+						attributeValue.match( underlineRegex )
 					)
 				) ? 'underline' : attributeValue;
 				return writer.createAttributeElement( 'span', { style: 'text-decoration: ' + value } );
@@ -195,7 +197,7 @@ export default class convertTagToStyle extends Plugin {
 					(
 						attributeValue &&
 						typeof attributeValue === 'string' &&
-						attributeValue.startsWith('line-through')
+						attributeValue.startsWith( 'line-through' )
 					)
 				) ? 'line-through solid' : attributeValue;
 				return writer.createAttributeElement( 'span', { style: 'text-decoration:' + value }, { priority: 11 } );
@@ -206,11 +208,11 @@ export default class convertTagToStyle extends Plugin {
 			model: 's',
 			view: ( attributeValue, writer ) => {
 				const value = (
-					attributeValue === true  ||
+					attributeValue === true ||
 					(
 						attributeValue &&
 						typeof attributeValue === 'string' &&
-						attributeValue.startsWith('line-through')
+						attributeValue.startsWith( 'line-through' )
 					)
 				) ? 'line-through solid' : attributeValue;
 				return writer.createAttributeElement( 'span', { style: 'text-decoration: ' + value }, { priority: 11 } );
