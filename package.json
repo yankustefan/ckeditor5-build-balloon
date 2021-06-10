@@ -1,6 +1,6 @@
 {
   "name": "@stefanyanku/ckeditor5-build-balloon",
-  "version": "21.0.13",
+  "version": "21.0.14",
   "description": "The balloon editor build of CKEditor 5 – the best browser-based rich text editor.",
   "keywords": [],
   "main": "./build/ckeditor.js",
