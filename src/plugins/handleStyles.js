@@ -37,10 +37,11 @@ export default class handleStyles extends Plugin {
 
 		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'fontBackgroundColor',
-			view: ( modelAttributeValue, viewWriter ) => {
+			view: ( modelAttributeValue, conversionApi ) => {
 				// console.log('downcast - backgroundColor',modelAttributeValue);
 				// #auto
-				return viewWriter.createAttributeElement( 'span', {
+				const { writer } = conversionApi;
+				return writer.createAttributeElement( 'span', {
 					style: `background-color:${ ( modelAttributeValue ) ? convertToHex( modelAttributeValue ) : null }`
 				}, { priority: 11 } );
 			},
@@ -69,8 +70,9 @@ export default class handleStyles extends Plugin {
 
 		conversion.for( 'dataDowncast' ).attributeToElement( {
 			model: 'fontColor',
-			view: ( modelAttributeValue, viewWriter ) => {
-				return viewWriter.createAttributeElement( 'span', {
+			view: ( modelAttributeValue, conversionApi ) => {
+				const { writer } = conversionApi;
+				return writer.createAttributeElement( 'span', {
 					style: `color:${ ( modelAttributeValue ) ? convertToHex( modelAttributeValue ) : null }`
 				}, { priority: 11 } );
 			},
@@ -79,15 +81,16 @@ export default class handleStyles extends Plugin {
 
 		conversion.for( 'editingDowncast' ).attributeToElement( {
 			model: 'fontColor',
-			view: ( modelAttributeValue, viewWriter ) => {
+			view: ( modelAttributeValue, conversionApi ) => {
+				const { writer } = conversionApi;
 				const newValue = ( modelAttributeValue ) ? convertToHex( modelAttributeValue ) : null;
-				const element = viewWriter.createAttributeElement( 'span', {
+				const element = writer.createAttributeElement( 'span', {
 					style: `color:${ ( modelAttributeValue ) ? convertToHex( modelAttributeValue ) : null }`
 				}, { priority: 11 } );
 				if ( newValue ) {
 					const brightness = calculateRgbBrightness( convertToRGB( modelAttributeValue ) );
 					if ( brightness > 220 ) {
-						viewWriter.addClass( 'ta-bright-text', element );
+						writer.addClass( 'ta-bright-text', element );
 					}
 				}
 				return element;
@@ -207,8 +210,9 @@ export default class handleStyles extends Plugin {
 		// This attribute should support all the styles not supported by native plugins
 		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'spanStyles',
-			view: ( modelAttributeValue, viewWriter ) => {
-				const element = viewWriter.createAttributeElement(
+			view: ( modelAttributeValue, conversionApi ) => {
+				const { writer } = conversionApi;
+				const element = writer.createAttributeElement(
 					'span',
 					{
 						'style': `${ modelAttributeValue }`

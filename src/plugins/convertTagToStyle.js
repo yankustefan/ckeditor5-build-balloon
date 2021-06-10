@@ -47,8 +47,9 @@ export default class convertTagToStyle extends Plugin {
 		// Add an downcast (model-to-view) converter for italic/font-style:italic attribute of a span.
 		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'italic',
-			view: ( modelAttributeValue, viewWriter ) => {
-				return viewWriter.createAttributeElement( 'span', {
+			view: ( modelAttributeValue, conversionApi ) => {
+				const { writer } = conversionApi;
+				return writer.createAttributeElement( 'span', {
 					'style': 'font-style:italic;'
 				}, { priority: 11 } );
 			},
@@ -93,8 +94,9 @@ export default class convertTagToStyle extends Plugin {
 		} );
 		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'bold',
-			view: ( modelAttributeValue, viewWriter ) => {
-				return viewWriter.createAttributeElement( 'span', {
+			view: ( modelAttributeValue, conversionApi ) => {
+				const { writer } = conversionApi;
+				return writer.createAttributeElement( 'span', {
 					'style': 'font-weight:bold;'
 				}, { priority: 11 } );
 			},
@@ -102,16 +104,6 @@ export default class convertTagToStyle extends Plugin {
 		} );
 
 		// Underline
-
-		// conversion.for( 'downcast' ).attributeToElement( {
-		// 	model: 'underline',
-		// 	view: ( modelAttributeValue, viewWriter ) => {
-		// 		return viewWriter.createAttributeElement( 'span', {
-		// 			'style': 'text-decoration: underline;'
-		// 		}, { priority: 11 } );
-		// 	},
-		// 	converterPriority: 'high'
-		// } );
 
 		const underlineRegex = /^underline(?!.*none.*).*/;
 
@@ -132,7 +124,7 @@ export default class convertTagToStyle extends Plugin {
 
 		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'underline',
-			view: ( attributeValue, writer ) => {
+			view: ( attributeValue, conversionApi ) => {
 				const value = (
 					attributeValue === true ||
 					(
@@ -141,6 +133,7 @@ export default class convertTagToStyle extends Plugin {
 						attributeValue.match( underlineRegex )
 					)
 				) ? 'underline' : attributeValue;
+				const { writer } = conversionApi;
 				return writer.createAttributeElement( 'span', { style: 'text-decoration:' + value }, { priority: 11 } );
 			},
 			converterPriority: 'high'
@@ -148,7 +141,7 @@ export default class convertTagToStyle extends Plugin {
 
 		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'u',
-			view: ( attributeValue, writer ) => {
+			view: ( attributeValue, conversionApi ) => {
 				const value = (
 					attributeValue === true ||
 					(
@@ -157,7 +150,8 @@ export default class convertTagToStyle extends Plugin {
 						attributeValue.match( underlineRegex )
 					)
 				) ? 'underline' : attributeValue;
-				return writer.createAttributeElement( 'span', { style: 'text-decoration: ' + value } );
+				const { writer } = conversionApi;
+				return writer.createAttributeElement( 'span', { style: 'text-decoration: ' + value }, { priority: 11 } );
 			},
 			converterPriority: 'high'
 		} );
@@ -166,8 +160,9 @@ export default class convertTagToStyle extends Plugin {
 
 		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'strikethrough',
-			view: ( modelAttributeValue, viewWriter ) => {
-				return viewWriter.createAttributeElement( 'span', {
+			view: ( modelAttributeValue, conversionApi ) => {
+				const { writer } = conversionApi;
+				return writer.createAttributeElement( 'span', {
 					'style': 'text-decoration: line-through;'
 				}, { priority: 11 } );
 			},
@@ -191,7 +186,7 @@ export default class convertTagToStyle extends Plugin {
 
 		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'strikethrough',
-			view: ( attributeValue, writer ) => {
+			view: ( attributeValue, conversionApi ) => {
 				const value = (
 					attributeValue === true ||
 					(
@@ -200,13 +195,14 @@ export default class convertTagToStyle extends Plugin {
 						attributeValue.startsWith( 'line-through' )
 					)
 				) ? 'line-through solid' : attributeValue;
+				const { writer } = conversionApi;
 				return writer.createAttributeElement( 'span', { style: 'text-decoration:' + value }, { priority: 11 } );
 			}
 		}, { priority: 'high' } );
 
 		conversion.for( 'downcast' ).attributeToElement( {
 			model: 's',
-			view: ( attributeValue, writer ) => {
+			view: ( attributeValue, conversionApi ) => {
 				const value = (
 					attributeValue === true ||
 					(
@@ -215,6 +211,7 @@ export default class convertTagToStyle extends Plugin {
 						attributeValue.startsWith( 'line-through' )
 					)
 				) ? 'line-through solid' : attributeValue;
+				const { writer } = conversionApi;
 				return writer.createAttributeElement( 'span', { style: 'text-decoration: ' + value }, { priority: 11 } );
 			}
 		}, { priority: 'high' } );

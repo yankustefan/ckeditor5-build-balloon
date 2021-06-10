@@ -24,8 +24,9 @@ export default class allowLrefAttribute extends Plugin {
 		// Add an downcast (model-to-view) converter for 'data-lref' attribute of a span.
 		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'dataLref',
-			view: ( modelAttributeValue, viewWriter ) => {
-				return viewWriter.createAttributeElement( 'span', {
+			view: ( modelAttributeValue, conversionApi ) => {
+				const { writer } = conversionApi;
+				return writer.createAttributeElement( 'span', {
 						'data-lref': `${ modelAttributeValue }`
 					},
 					// { priority: 11 }
