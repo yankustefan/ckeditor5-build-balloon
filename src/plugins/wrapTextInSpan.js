@@ -12,8 +12,13 @@ export default class wrapTextInSpan extends Plugin {
 
 		model.schema.extend( '$text', { allowAttributes: 'emptySpan' } );
 
+		// model.document.on('change:data', (eventInfo, batch) => {
+		// 	console.log(eventInfo);
+		// 	console.log(batch);
+		// } );
+
 		// upcast(view-to-model) conversion
-		conversion.for( 'upcast' ).elementToAttribute({
+		conversion.for('upcast').elementToAttribute({
 			view: emptySpanMatcher,
 			model: {
 				key: 'emptySpan',
@@ -23,60 +28,20 @@ export default class wrapTextInSpan extends Plugin {
 		} );
 
 		// downcast(model-to-view) conversion
-		conversion.for( 'downcast' ).attributeToElement({
+		conversion.for('downcast').attributeToElement({
 			model: 'emptySpan',
 			view: createViewEmptySpanElement,
 			converterPriority: 'high'
 		});
 
-		document.registerPostFixer(writer => newTextInsertPostFixer(writer, document));
-		// document.registerPostFixer( writer => {
-
-		// 	for (const entry of document.differ.getChanges()) {
-		// 		console.log("change:entry", entry);
-		// 		console.log("insert:entry.position.nodeAfter", entry.position.nodeAfter);
-				
-		// 		if (entry.type === "insert" && entry.name === "$text" && entry.position.textNode) {
-		// 			console.log("insert:entry", entry);
-		// 			console.log("insert:entry.position", entry.position);
-		// 			console.log("insert:entry.position.textNode", entry.position.textNode);
-
-		// 			// console.log("entry.position.textNode.getAttributes()");
-					
-		// 			if (Array.from(entry.position.textNode.getAttributeKeys()).length === 0) {
-		// 				writer.setAttribute('emptySpan', true, entry.position.textNode);
-		// 			}
-		// 			// return true;
-		// 		}
-
-		// 		if (entry.type === "attribute") {
-		// 			console.log("attribute:entry", entry);
-		// 			console.log("attribute:entry.position", entry.position);
-		// 			console.log("entry.range.start.nodeBefore", entry.range.start.nodeBefore);
-		// 			console.log("entry.range.start.nodeAfter", entry.range.start.nodeAfter);
-					
-		// 			if (
-		// 				entry.range.start.nodeBefore &&
-		// 				entry.range.start.nodeBefore.is('text') &&
-		// 				Array.from(entry.range.start.nodeBefore.getAttributeKeys()).length === 0
-		// 			) {
-		// 				writer.setAttribute('emptySpan', true, entry.range.start.nodeBefore);
-		// 			}
-					
-		// 			if (
-		// 				entry.range.end.nodeAfter &&
-		// 				entry.range.end.nodeAfter.is('text') &&
-		// 				Array.from(entry.range.end.nodeAfter.getAttributeKeys()).length === 0
-		// 			) {
-		// 				writer.setAttribute('emptySpan', true, entry.range.end.nodeAfter);
-		// 			}
-		// 		}
-		// 	}
-		// });
+		document.registerPostFixer(writer => textInsertPostFixer(writer, document));
+		document.registerPostFixer(writer => attributeChangePostFixer(writer, document));
+		// document.registerPostFixer(writer => attributeOnPostFixer(writer, document));
+		// document.registerPostFixer(writer => attributeOffPostFixer(writer, document));
 		
+
+
 		// Handle empty spans
-
-
 		// Add low-level converter only for data taken out of the editor.
 		// It will wrap text into a span.
 		// conversion.for( 'dataDowncast' ).add( dispatcher => {
@@ -121,31 +86,30 @@ function emptySpanMatcher(element) {
 	return null;
 }
 
-function newTextInsertPostFixer(writer, document) {
+function textInsertPostFixer(writer, document) {
 	const changes = document.differ.getChanges();
 	let wasChanged = false;
 	
 	for (const entry of changes) {
-		if (entry.type === "insert" && entry.name === "$text") {
-			
-			console.log("entry.position.nodeBefore", entry.position.nodeBefore);
-			console.log("entry.position.nodeAfter", entry.position.nodeAfter);
-			console.log("entry.position.textNode", entry.position.textNode);
-			
-			const position = entry.position;
+		if (
+			entry.name === "$text" &&
+			(entry.type === "insert" || entry.type === "remove")
+		) {
+
+			const { textNode, nodeBefore, nodeAfter } = entry.position;
 			let insertedText;
 
-			if (position.textNode) {
-				insertedText = position.textNode;
+			if (textNode) {
+				insertedText = textNode;
 
-			} else if (position.nodeBefore && position.nodeBefore.is("text")) {
-				insertedText = position.nodeBefore;
+			} else if (nodeBefore && nodeBefore.is("text")) {
+				insertedText = nodeBefore;
 			
-			} else if (position.nodeAfter && position.nodeAfter.is("text")) {
-				insertedText = position.nodeAfter;
+			} else if (nodeAfter && nodeAfter.is("text")) {
+				insertedText = nodeAfter;
 			}
-			
-			if (insertedText && Array.from(insertedText.getAttributeKeys()).length === 0) {
+
+			if (insertedText && hasNoAttributes(insertedText)) {
 				writer.setAttribute('emptySpan', true, insertedText);
 				wasChanged = true;
 			}
@@ -154,5 +118,226 @@ function newTextInsertPostFixer(writer, document) {
 	return wasChanged;
 }
 
-function isNotEmpyAttribute() {}
-function checkAndFix( textNode, writer ) {}
+// function attributeChangePostFixer(writer, document) {
+// 	const changes = document.differ.getChanges();
+// 	let wasChanged = false;
+
+// 	for (const entry of changes) {
+// 		if (entry.type === 'attribute' && entry.attributeKey !== 'emptySpan') {
+
+// 			// console.log("change:entry", entry);
+
+// 			// attribute on
+// 			if (entry.attributeNewValue === true && entry.attributeOldValue === null) {
+// 				console.log('on:entry', entry);
+				
+// 				const nodeBefore = entry.range.start.nodeBefore;
+// 				const nodeAfter = entry.range.end.nodeAfter;
+
+// 				if (nodeBefore && nodeBefore.is("text") && hasNoAttributes(nodeBefore)) {
+// 					writer.setAttribute('emptySpan', true, nodeBefore);
+// 					wasChanged = true;
+// 				}
+
+// 				if (nodeAfter && nodeAfter.is("text") && hasNoAttributes(nodeAfter)) {
+// 					writer.setAttribute('emptySpan', true, nodeAfter);
+// 					wasChanged = true;
+// 				}
+				
+// 				for (const node of entry.range.getItems()) {
+// 					if ((node.is('text') || node.is('textProxy'))) {
+						
+// 						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
+// 							writer.removeAttribute('emptySpan', node);
+// 							wasChanged = true;
+// 						}
+						
+// 						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
+// 							writer.setAttribute('emptySpan', true, node);
+// 							wasChanged = true;
+// 						}
+						
+// 						// console.log("hasEmptySpanAttribute", hasEmptySpanAttribute(node));
+// 						// console.log("hasStyleAttribute", hasStyleAttribute(node));
+// 						// for (const attr of node.getAttributeKeys()) {
+// 						// 	console.log(attr);
+// 						// }
+// 						// writer.setAttribute('emptySpan', true, node);
+// 					}
+// 				}
+// 			}
+			
+// 			// attribute off
+// 			if (entry.attributeNewValue === null && entry.attributeOldValue === true) {
+// 				console.log('off:entry', entry);
+// 				for (const node of entry.range.getItems()) {
+// 					if ((node.is('text') || node.is('textProxy'))) {
+// 						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
+// 							writer.removeAttribute('emptySpan', node);
+// 							wasChanged = true;
+// 						}
+// 						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
+// 							writer.setAttribute('emptySpan', true, node);
+// 							wasChanged = true;
+// 						}
+// 					}
+// 				}
+				
+// 			}
+// 		}
+// 	}
+
+// 	return wasChanged;
+// }
+
+function attributeChangePostFixer(writer, document) {
+	const changes = document.differ.getChanges();
+
+	for (const entry of changes) {
+
+		if (entry.type === 'attribute' && entry.attributeKey !== 'emptySpan') {
+
+			// console.log("change:entry", entry);
+
+			// attribute on
+			if (entry.attributeNewValue === true && entry.attributeOldValue === null) {
+				console.log('on:entry', entry);
+				
+				const nodeBefore = entry.range.start.nodeBefore;
+				const nodeAfter = entry.range.end.nodeAfter;
+
+				if (nodeBefore && nodeBefore.is("text") && hasNoAttributes(nodeBefore)) {
+					writer.setAttribute('emptySpan', true, nodeBefore);
+					return true;
+				}
+
+				if (nodeAfter && nodeAfter.is("text") && hasNoAttributes(nodeAfter)) {
+					writer.setAttribute('emptySpan', true, nodeAfter);
+					return true;
+				}
+				
+				for (const node of entry.range.getItems()) {
+					if ((node.is('text') || node.is('textProxy'))) {
+						
+						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
+							writer.removeAttribute('emptySpan', node);
+							return true;
+						}
+						
+						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
+							writer.setAttribute('emptySpan', true, node);
+							return true;
+						}
+					}
+				}
+			}
+			
+			// attribute off
+			if (entry.attributeNewValue === null && entry.attributeOldValue === true) {
+				console.log('off:entry', entry);
+				for (const node of entry.range.getItems()) {
+					if ((node.is('text') || node.is('textProxy'))) {
+						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
+							writer.removeAttribute('emptySpan', node);
+							return true;
+						}
+						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
+							writer.setAttribute('emptySpan', true, node);
+							return true;
+						}
+					}
+				}
+				
+			}
+		}
+	}
+
+	return false;
+}
+
+// function attributeOnPostFixer(writer, document) {
+// 	const changes = document.differ.getChanges();
+// 	for (const entry of changes) {
+// 		if (entry.type === 'attribute' && entry.attributeKey !== 'emptySpan') {
+// 			// attribute on
+// 			if (entry.attributeNewValue === true && entry.attributeOldValue === null) {
+// 				console.log('on:entry', entry);
+				
+// 				const nodeBefore = entry.range.start.nodeBefore;
+// 				const nodeAfter = entry.range.end.nodeAfter;
+
+// 				if (nodeBefore && nodeBefore.is("text") && hasNoAttributes(nodeBefore)) {
+// 					writer.setAttribute('emptySpan', true, nodeBefore);
+// 					return true;
+// 				}
+
+// 				if (nodeAfter && nodeAfter.is("text") && hasNoAttributes(nodeAfter)) {
+// 					writer.setAttribute('emptySpan', true, nodeAfter);
+// 					return true;
+// 				}
+				
+// 				for (const node of entry.range.getItems()) {
+// 					if ((node.is('text') || node.is('textProxy'))) {
+						
+// 						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
+// 							writer.removeAttribute('emptySpan', node);
+// 							return true;
+// 						}
+						
+// 						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
+// 							writer.setAttribute('emptySpan', true, node);
+// 							return true;
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+
+// 	return false;
+// }
+
+// function attributeOffPostFixer(writer, document) {
+// 	const changes = document.differ.getChanges();
+
+// 	for (const entry of changes) {
+// 		if (entry.type === 'attribute' && entry.attributeKey !== 'emptySpan') {
+// 			console.log('off:entry', entry);
+// 			if (entry.attributeNewValue === null && entry.attributeOldValue === true) {
+// 				for (const node of entry.range.getItems()) {
+// 					if ((node.is('text') || node.is('textProxy'))) {
+// 						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
+// 							writer.removeAttribute('emptySpan', node);
+// 							return true;
+// 						}
+// 						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
+// 							writer.setAttribute('emptySpan', true, node);
+// 							return true;
+// 						}
+// 					}
+// 				}
+				
+// 			}
+// 		}
+// 	}
+
+// 	return false;
+// }
+
+
+function hasEmptySpanAttribute(textNode) {
+	return textNode.hasAttribute("emptySpan")
+}
+
+function hasStyleAttribute(textNode) {
+	for (const attr of textNode.getAttributeKeys()) {
+		if (attr !== 'emptySpan') {
+			return true;
+		}
+	}
+	return false;
+}
+
+function hasNoAttributes(textNode) {
+	return Array.from(textNode.getAttributeKeys()).length === 0
+}
