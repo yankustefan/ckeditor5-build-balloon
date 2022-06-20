@@ -115,15 +115,27 @@ export default class handleStyles extends Plugin {
 			converterPriority: 'high'
 		} );
 
-		conversion.for( 'dataDowncast' ).attributeToElement( {
+		conversion.for( 'downcast' ).attributeToElement( {
 			model: 'fontSize',
-			view: ( modelAttributeValue, viewWriter ) => {
-				return viewWriter.createAttributeElement( 'span', {
+			view: ( modelAttributeValue, conversionApi ) => {
+				const { writer } = conversionApi;
+				return writer.createAttributeElement( 'span', {
 					style: `font-size:${ modelAttributeValue }`
 				}, { priority: 11 } );
 			},
 			converterPriority: 'high'
 		} );
+
+		// conversion.for( 'dataDowncast' ).attributeToElement( {
+		// 	model: 'fontSize',
+		// 	view: ( modelAttributeValue, conversionApi ) => {
+		// 		const { writer } = conversionApi;
+		// 		return writer.createAttributeElement( 'span', {
+		// 			style: `font-size:${ modelAttributeValue }`
+		// 		}, { priority: 11 } );
+		// 	},
+		// 	converterPriority: 'high'
+		// } );
 
 		// conversion.for( 'editingDowncast' ).attributeToElement( {
 		// 	model: 'fontSize',
