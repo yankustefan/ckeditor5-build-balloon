@@ -37,19 +37,22 @@
 	<p>red</p>
 	<p>Text is <u>underlined (u)</u></p>
 	<p>Text is <s>striked through (s)</s></p>
-	<p>Text <span style="text-decoration: line-through">crossed (span)</span> out</p>
+	<p>Text <span style="text-decoration: line-through">crossed (span)</span><span> out</span></p>
 	<p><span data-lref="1" style="font-family: 'Calibri'; font-size: 12pt; text-decoration: line-through solid;">strikethrough</span></p>
 	<p><span data-lref="1" style="font-family: 'Calibri'; font-size: 12pt; text-decoration: underline solid;">Underline</span></p>
 	<p><span data-lref="1" style="font-family: 'Calibri'; font-size: 12pt; text-decoration: underline none #000000;">Underline 'none'</span></p>
 	<p><span data-lref="1"><span style="background-color:#auto;color:#F2F2F2;"><span style="font-weight:bold;">SHOP No</span></span></span></p>
-	<p><span data-lref="1"><span style="color:#CC99FF;font-size:10pt;"><span style="color:#FF0000;"><span style="font-weight:bold;">SHOP</span></span><span style="font-weight:bold;"> No</span></span></span></p></div>
+	<p><span data-lref="1"><span style="color:#CC99FF;font-size:10pt;"><span style="color:#FF0000;"><span style="font-weight:bold;">SHOP</span></span><span style="font-weight:bold;"> No</span></span></span></p>
+	</div>
 <button id="submit">Click</button>
 
 <script src="../build/ckeditor.js"></script>
+<script src="../node_modules/@ckeditor/ckeditor5-inspector/build/inspector.js"></script>
 <script>
 	BalloonEditor.create( document.querySelector( '#editor' ) )
 		.then( editor => {
 			window.editor = editor;
+			CKEditorInspector.attach(editor);
 			const balloonToolbar = editor.plugins.get( 'BalloonToolbar' )
 			balloonToolbar.toolbarView.element.style.minWidth = '396px'; // pass the value here.
 		} )

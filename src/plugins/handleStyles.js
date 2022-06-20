@@ -99,7 +99,6 @@ export default class handleStyles extends Plugin {
 		} );
 
 		// font size
-		/*
 		conversion.for( 'upcast' ).attributeToAttribute( {
 			view: {
 				name: 'span',
@@ -126,41 +125,40 @@ export default class handleStyles extends Plugin {
 			converterPriority: 'high'
 		} );
 
-		conversion.for( 'editingDowncast' ).attributeToElement( {
-			model: 'fontSize',
-			view: ( modelAttributeValue, viewWriter ) => {
-				const element = viewWriter.createAttributeElement(
-					'span',
-					{
-						style: `font-size:${ modelAttributeValue }`
-					},
-					{ priority: 11 }
-				);
-				if (
-					modelAttributeValue
-				) {
-					const sizeValue = parseInt( modelAttributeValue );
-					if ( sizeValue ) {
-						let sizeClassName;
-						if ( sizeValue <= 16 ) {
-							sizeClassName = 'ta-font-size-medium';
-						} else if ( sizeValue <= 20 ) {
-							sizeClassName = 'ta-font-size-l';
-						} else if ( sizeValue <= 24 ) {
-							sizeClassName = 'ta-font-size-xl';
-						} else {
-							sizeClassName = 'ta-font-size-xxl';
-						}
-						if ( sizeClassName ) {
-							viewWriter.addClass( sizeClassName, element );
-						}
-					}
-				}
-				return element;
-			},
-			converterPriority: 'high'
-		} );
-		*/
+		// conversion.for( 'editingDowncast' ).attributeToElement( {
+		// 	model: 'fontSize',
+		// 	view: ( modelAttributeValue, viewWriter ) => {
+		// 		const element = viewWriter.createAttributeElement(
+		// 			'span',
+		// 			{
+		// 				style: `font-size:${ modelAttributeValue }`
+		// 			},
+		// 			{ priority: 11 }
+		// 		);
+		// 		if (
+		// 			modelAttributeValue
+		// 		) {
+		// 			const sizeValue = parseInt( modelAttributeValue );
+		// 			if ( sizeValue ) {
+		// 				let sizeClassName;
+		// 				if ( sizeValue <= 16 ) {
+		// 					sizeClassName = 'ta-font-size-medium';
+		// 				} else if ( sizeValue <= 20 ) {
+		// 					sizeClassName = 'ta-font-size-l';
+		// 				} else if ( sizeValue <= 24 ) {
+		// 					sizeClassName = 'ta-font-size-xl';
+		// 				} else {
+		// 					sizeClassName = 'ta-font-size-xxl';
+		// 				}
+		// 				if ( sizeClassName ) {
+		// 					viewWriter.addClass( sizeClassName, element );
+		// 				}
+		// 			}
+		// 		}
+		// 		return element;
+		// 	},
+		// 	converterPriority: 'high'
+		// } );
 
 		// Add an upcast (view-to-model) converter for style attribute of a span.
 		conversion.for( 'upcast' )
