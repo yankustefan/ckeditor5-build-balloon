@@ -12,11 +12,6 @@ export default class wrapTextInSpan extends Plugin {
 
 		model.schema.extend( '$text', { allowAttributes: 'emptySpan' } );
 
-		// model.document.on('change:data', (eventInfo, batch) => {
-		// 	console.log(eventInfo);
-		// 	console.log(batch);
-		// } );
-
 		// upcast(view-to-model) conversion
 		conversion.for('upcast').elementToAttribute({
 			view: emptySpanMatcher,
@@ -25,7 +20,9 @@ export default class wrapTextInSpan extends Plugin {
 				value: true
 			},
 			converterPriority: 'low'
-		} );
+		});
+
+		// conversion.for('upcast').add(wrapTextNodeBySpanDispatcher);
 
 		// downcast(model-to-view) conversion
 		conversion.for('downcast').attributeToElement({
@@ -36,55 +33,17 @@ export default class wrapTextInSpan extends Plugin {
 
 		document.registerPostFixer(writer => textInsertPostFixer(writer, document));
 		document.registerPostFixer(writer => attributeChangePostFixer(writer, document));
-		// document.registerPostFixer(writer => attributeOnPostFixer(writer, document));
-		// document.registerPostFixer(writer => attributeOffPostFixer(writer, document));
-		
-
-
-		// Handle empty spans
-		// Add low-level converter only for data taken out of the editor.
-		// It will wrap text into a span.
-		// conversion.for( 'dataDowncast' ).add( dispatcher => {
-		// 	dispatcher.on( 'insert:$text', ( evt, data, conversionApi ) => {
-		// 		console.log(data);
-		// 		// If text has any attributes stop processing as these attributes
-		// 		// will be converted to elements wrapping text in view.
-		// 		if (!data.item.getAttributes().next().done) {
-		// 			return;
-		// 		}
-		// 		if (!conversionApi.consumable.consume( data.item, 'insert' )) {
-		// 			return;
-		// 		}
-		// 		const viewWriter = conversionApi.writer;
-		// 		// create position in view based on range
-		// 		const viewPosition = conversionApi.mapper.toViewPosition( data.range.start );
-		// 		// create text in view based on input data
-		// 		const viewText = viewWriter.createText( data.item.data );
-		// 		// create wrapper span
-		// 		const span = viewWriter.createAttributeElement( 'span' );
-		// 		// insert view text at the specified view postion
-		// 		viewWriter.insert( viewWriter.createPositionAt( viewPosition.parent, 'end' ), viewText );
-		// 		// wrap view text in span
-		// 		viewWriter.wrap( viewWriter.createRangeOn( viewText ), span );
-		// 	}, { priority: 'low' } );
-		// } );
 	}
 }
 
-function createViewEmptySpanElement(modelAttributeValue, { writer }) {
-	if ( !modelAttributeValue ) return;
-	const options = {
-		priority: 11
-	};
-	return writer.createAttributeElement('span', {}, options);
-}
 
-function emptySpanMatcher(element) {
-	if (element && element.name === 'span' && !element.getStyle()) {
-		return { name: true }
-	}
-	return null;
-}
+// function wrapTextNodeBySpanDispatcher(dispatcher) {
+// 	dispatcher.on('text', ( evt, data, conversionApi ) => {
+// 		if (data.viewItem.is('text') && data.viewItem.parent.name === 'p') {
+// 			console.log("wrapTextNodeBySpanDispatcher:data", data);
+// 		}
+// 	},{ priority: 'low' })
+// }
 
 function textInsertPostFixer(writer, document) {
 	const changes = document.differ.getChanges();
@@ -102,10 +61,10 @@ function textInsertPostFixer(writer, document) {
 			if (textNode) {
 				insertedText = textNode;
 
-			} else if (nodeBefore && nodeBefore.is("text")) {
+			} else if (isTextLikeNode(nodeBefore)) {
 				insertedText = nodeBefore;
 			
-			} else if (nodeAfter && nodeAfter.is("text")) {
+			} else if (isTextLikeNode(nodeAfter)) {
 				insertedText = nodeAfter;
 			}
 
@@ -118,226 +77,104 @@ function textInsertPostFixer(writer, document) {
 	return wasChanged;
 }
 
-// function attributeChangePostFixer(writer, document) {
-// 	const changes = document.differ.getChanges();
-// 	let wasChanged = false;
-
-// 	for (const entry of changes) {
-// 		if (entry.type === 'attribute' && entry.attributeKey !== 'emptySpan') {
-
-// 			// console.log("change:entry", entry);
-
-// 			// attribute on
-// 			if (entry.attributeNewValue === true && entry.attributeOldValue === null) {
-// 				console.log('on:entry', entry);
-				
-// 				const nodeBefore = entry.range.start.nodeBefore;
-// 				const nodeAfter = entry.range.end.nodeAfter;
-
-// 				if (nodeBefore && nodeBefore.is("text") && hasNoAttributes(nodeBefore)) {
-// 					writer.setAttribute('emptySpan', true, nodeBefore);
-// 					wasChanged = true;
-// 				}
-
-// 				if (nodeAfter && nodeAfter.is("text") && hasNoAttributes(nodeAfter)) {
-// 					writer.setAttribute('emptySpan', true, nodeAfter);
-// 					wasChanged = true;
-// 				}
-				
-// 				for (const node of entry.range.getItems()) {
-// 					if ((node.is('text') || node.is('textProxy'))) {
-						
-// 						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
-// 							writer.removeAttribute('emptySpan', node);
-// 							wasChanged = true;
-// 						}
-						
-// 						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
-// 							writer.setAttribute('emptySpan', true, node);
-// 							wasChanged = true;
-// 						}
-						
-// 						// console.log("hasEmptySpanAttribute", hasEmptySpanAttribute(node));
-// 						// console.log("hasStyleAttribute", hasStyleAttribute(node));
-// 						// for (const attr of node.getAttributeKeys()) {
-// 						// 	console.log(attr);
-// 						// }
-// 						// writer.setAttribute('emptySpan', true, node);
-// 					}
-// 				}
-// 			}
-			
-// 			// attribute off
-// 			if (entry.attributeNewValue === null && entry.attributeOldValue === true) {
-// 				console.log('off:entry', entry);
-// 				for (const node of entry.range.getItems()) {
-// 					if ((node.is('text') || node.is('textProxy'))) {
-// 						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
-// 							writer.removeAttribute('emptySpan', node);
-// 							wasChanged = true;
-// 						}
-// 						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
-// 							writer.setAttribute('emptySpan', true, node);
-// 							wasChanged = true;
-// 						}
-// 					}
-// 				}
-				
-// 			}
-// 		}
-// 	}
-
-// 	return wasChanged;
-// }
 
 function attributeChangePostFixer(writer, document) {
 	const changes = document.differ.getChanges();
+	let wasChanged = false;
 
 	for (const entry of changes) {
 
 		if (entry.type === 'attribute' && entry.attributeKey !== 'emptySpan') {
-
-			// console.log("change:entry", entry);
-
 			// attribute on
-			if (entry.attributeNewValue === true && entry.attributeOldValue === null) {
-				console.log('on:entry', entry);
+			// some styles have value which is not boolean (e.g. fontColor)
+			if (entry.attributeNewValue && entry.attributeOldValue === null) {
 				
 				const nodeBefore = entry.range.start.nodeBefore;
 				const nodeAfter = entry.range.end.nodeAfter;
 
-				if (nodeBefore && nodeBefore.is("text") && hasNoAttributes(nodeBefore)) {
+				// when a part of text is set style, others should have emptySpan
+				// so check before/after node to have style then if not
+				// set emptySpan attrtibute
+				// e.g.
+				// red
+				// => r<strong>e</strong>d
+				// => <span>r</span><strong>e</strong><span>d</span>
+				if (isTextLikeNode(nodeBefore) && hasNoAttributes(nodeBefore)) {
 					writer.setAttribute('emptySpan', true, nodeBefore);
-					return true;
+					wasChanged = true;
 				}
 
-				if (nodeAfter && nodeAfter.is("text") && hasNoAttributes(nodeAfter)) {
+				if (isTextLikeNode(nodeAfter) && hasNoAttributes(nodeAfter)) {
 					writer.setAttribute('emptySpan', true, nodeAfter);
-					return true;
+					wasChanged = true;
 				}
 				
+				// emptySpan is set only when the text has no style
+				// so when it already has, remove the attribute
 				for (const node of entry.range.getItems()) {
-					if ((node.is('text') || node.is('textProxy'))) {
-						
-						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
-							writer.removeAttribute('emptySpan', node);
-							return true;
-						}
-						
-						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
-							writer.setAttribute('emptySpan', true, node);
-							return true;
-						}
+					if (
+						isTextLikeNode(node) &&
+						hasStyleAttribute(node) &&
+						hasEmptySpanAttribute(node)
+					) {
+						writer.removeAttribute('emptySpan', node);
+						wasChanged = true;
 					}
 				}
 			}
-			
+
 			// attribute off
-			if (entry.attributeNewValue === null && entry.attributeOldValue === true) {
-				console.log('off:entry', entry);
+			// when off attribute, if the text doesn't have any styles,
+			// it should have emptySpan
+			if (entry.attributeNewValue === null && entry.attributeOldValue) {
 				for (const node of entry.range.getItems()) {
-					if ((node.is('text') || node.is('textProxy'))) {
-						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
-							writer.removeAttribute('emptySpan', node);
-							return true;
-						}
-						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
-							writer.setAttribute('emptySpan', true, node);
-							return true;
-						}
+					if (
+						isTextLikeNode(node) &&
+						!hasStyleAttribute(node) &&
+						!hasEmptySpanAttribute(node)
+					) {
+						writer.setAttribute('emptySpan', true, node);
+						wasChanged = true;
 					}
 				}
-				
 			}
 		}
 	}
-
-	return false;
+	return wasChanged;
 }
 
-// function attributeOnPostFixer(writer, document) {
-// 	const changes = document.differ.getChanges();
-// 	for (const entry of changes) {
-// 		if (entry.type === 'attribute' && entry.attributeKey !== 'emptySpan') {
-// 			// attribute on
-// 			if (entry.attributeNewValue === true && entry.attributeOldValue === null) {
-// 				console.log('on:entry', entry);
-				
-// 				const nodeBefore = entry.range.start.nodeBefore;
-// 				const nodeAfter = entry.range.end.nodeAfter;
-
-// 				if (nodeBefore && nodeBefore.is("text") && hasNoAttributes(nodeBefore)) {
-// 					writer.setAttribute('emptySpan', true, nodeBefore);
-// 					return true;
-// 				}
-
-// 				if (nodeAfter && nodeAfter.is("text") && hasNoAttributes(nodeAfter)) {
-// 					writer.setAttribute('emptySpan', true, nodeAfter);
-// 					return true;
-// 				}
-				
-// 				for (const node of entry.range.getItems()) {
-// 					if ((node.is('text') || node.is('textProxy'))) {
-						
-// 						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
-// 							writer.removeAttribute('emptySpan', node);
-// 							return true;
-// 						}
-						
-// 						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
-// 							writer.setAttribute('emptySpan', true, node);
-// 							return true;
-// 						}
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-
-// 	return false;
-// }
-
-// function attributeOffPostFixer(writer, document) {
-// 	const changes = document.differ.getChanges();
-
-// 	for (const entry of changes) {
-// 		if (entry.type === 'attribute' && entry.attributeKey !== 'emptySpan') {
-// 			console.log('off:entry', entry);
-// 			if (entry.attributeNewValue === null && entry.attributeOldValue === true) {
-// 				for (const node of entry.range.getItems()) {
-// 					if ((node.is('text') || node.is('textProxy'))) {
-// 						if (hasStyleAttribute(node) && hasEmptySpanAttribute(node)) {
-// 							writer.removeAttribute('emptySpan', node);
-// 							return true;
-// 						}
-// 						if (!hasStyleAttribute(node) && !hasEmptySpanAttribute(node)) {
-// 							writer.setAttribute('emptySpan', true, node);
-// 							return true;
-// 						}
-// 					}
-// 				}
-				
-// 			}
-// 		}
-// 	}
-
-// 	return false;
-// }
-
-
-function hasEmptySpanAttribute(textNode) {
-	return textNode.hasAttribute("emptySpan")
+function createViewEmptySpanElement(modelAttributeValue, { writer }) {
+	if ( !modelAttributeValue ) return;
+	const options = {
+		priority: 11
+	};
+	return writer.createAttributeElement('span', {}, options);
 }
 
-function hasStyleAttribute(textNode) {
-	for (const attr of textNode.getAttributeKeys()) {
-		if (attr !== 'emptySpan') {
+function emptySpanMatcher(element) {
+	if (element && element.name === 'span' && !element.getStyle()) {
+		return { name: true }
+	}
+	return null;
+}
+
+function isTextLikeNode(node) {
+	return node && (node.is('text') || node.is('textProxy'));
+}
+
+function hasEmptySpanAttribute(node) {
+	return node.hasAttribute("emptySpan")
+}
+
+function hasStyleAttribute(node) {
+	for (const attr of node.getAttributeKeys()) {
+		if (attr !== 'emptySpan' && attr !== 'dataLref') {
 			return true;
 		}
 	}
 	return false;
 }
 
-function hasNoAttributes(textNode) {
-	return Array.from(textNode.getAttributeKeys()).length === 0
+function hasNoAttributes(node) {
+	return Array.from(node.getAttributeKeys()).length === 0
 }
