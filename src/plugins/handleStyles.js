@@ -278,17 +278,20 @@ function superScriptPostFixer(writer, document) {
 	let wasChanged = false;
 
 	for (const entry of changes) {
-		if (entry.type === 'attribute' && entry.attributeKey === 'superscript') {
-			if (entry.attributeNewValue && entry.attributeOldValue === null) {
-				for (const node of entry.range.getItems()) {
-					if (
-						node &&
-						(node.is('text') || node.is('textProxy')) &&
-						node.hasAttribute("subscript")
-					) {
-						writer.removeAttribute('subscript', node);
-						wasChanged = true;
-					}
+		if (
+			entry.type === 'attribute' &&
+			entry.attributeKey === 'superscript' &&
+			entry.attributeNewValue &&
+			entry.attributeOldValue === null
+		) {
+			for (const node of entry.range.getItems()) {
+				if (
+					node &&
+					(node.is('text') || node.is('textProxy')) &&
+					node.hasAttribute("subscript")
+				) {
+					writer.removeAttribute('subscript', node);
+					wasChanged = true;
 				}
 			}
 		}
@@ -301,17 +304,20 @@ function subScriptPostFixer(writer, document) {
 	let wasChanged = false;
 
 	for (const entry of changes) {
-		if (entry.type === 'attribute' && entry.attributeKey === 'subscript') {
-			if (entry.attributeNewValue && entry.attributeOldValue === null) {
-				for (const node of entry.range.getItems()) {
-					if (
-						node &&
-						(node.is('text') || node.is('textProxy')) &&
-						node.hasAttribute("superscript")
-					) {
-						writer.removeAttribute('superscript', node);
-						wasChanged = true;
-					}
+		if (
+			entry.type === 'attribute' &&
+			entry.attributeKey === 'subscript' &&
+			entry.attributeNewValue &&
+			entry.attributeOldValue === null
+		 ) {
+			for (const node of entry.range.getItems()) {
+				if (
+					node &&
+					(node.is('text') || node.is('textProxy')) &&
+					node.hasAttribute("superscript")
+				) {
+					writer.removeAttribute('superscript', node);
+					wasChanged = true;
 				}
 			}
 		}
