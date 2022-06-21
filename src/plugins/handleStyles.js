@@ -7,6 +7,7 @@ export default class handleStyles extends Plugin {
 	init() {
 		const editor = this.editor;
 		const conversion = editor.conversion;
+		const document = editor.model.document;
 
 		// allow any style
 		editor.model.schema.extend( '$text', {
@@ -14,6 +15,11 @@ export default class handleStyles extends Plugin {
 				'spanStyles'
 			]
 		} );
+
+		// superscript and subscript are exclusive
+		// when one is set, remove other
+		document.registerPostFixer(writer => superScriptPostFixer(writer, document));
+		document.registerPostFixer(writer => subScriptPostFixer(writer, document));
 
 		// Overwrite default handling for color style.
 		//  Add an upcast (view-to-model) converter for fontColor/color attribute of a span.
@@ -172,6 +178,36 @@ export default class handleStyles extends Plugin {
 		// 	converterPriority: 'high'
 		// } );
 
+		// subscript
+		conversion.for( 'downcast' )
+			.attributeToElement( {
+				model: 'subscript',
+				view: ( modelAttributeValue, conversionApi ) => {
+					const { writer } = conversionApi;
+					return writer.createAttributeElement(
+						'span',
+						{ style: 'vertical-align: sub' },
+						{ priority: 11 }
+					);
+				},
+				converterPriority: 'high'
+			});
+
+		// superscript
+		conversion.for( 'downcast' )
+			.attributeToElement( {
+				model: 'superscript',
+				view: ( modelAttributeValue, conversionApi ) => {
+					const { writer } = conversionApi;
+					return writer.createAttributeElement(
+						'span',
+						{ style: 'vertical-align: super' },
+						{ priority: 11 }
+					);
+				},
+				converterPriority: 'high'
+			});
+
 		// Add an upcast (view-to-model) converter for style attribute of a span.
 		conversion.for( 'upcast' )
 			.elementToAttribute( {
@@ -237,3 +273,48 @@ export default class handleStyles extends Plugin {
 	}
 }
 
+function superScriptPostFixer(writer, document) {
+	const changes = document.differ.getChanges();
+	let wasChanged = false;
+
+	for (const entry of changes) {
+		if (entry.type === 'attribute' && entry.attributeKey === 'superscript') {
+			if (entry.attributeNewValue && entry.attributeOldValue === null) {
+				for (const node of entry.range.getItems()) {
+					if (
+						node &&
+						(node.is('text') || node.is('textProxy')) &&
+						node.hasAttribute("subscript")
+					) {
+						writer.removeAttribute('subscript', node);
+						wasChanged = true;
+					}
+				}
+			}
+		}
+	}
+	return wasChanged;
+}
+
+function subScriptPostFixer(writer, document) {
+	const changes = document.differ.getChanges();
+	let wasChanged = false;
+
+	for (const entry of changes) {
+		if (entry.type === 'attribute' && entry.attributeKey === 'subscript') {
+			if (entry.attributeNewValue && entry.attributeOldValue === null) {
+				for (const node of entry.range.getItems()) {
+					if (
+						node &&
+						(node.is('text') || node.is('textProxy')) &&
+						node.hasAttribute("superscript")
+					) {
+						writer.removeAttribute('superscript', node);
+						wasChanged = true;
+					}
+				}
+			}
+		}
+	}
+	return wasChanged;
+}
