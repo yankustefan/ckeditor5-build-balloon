@@ -217,4 +217,3 @@ export default class convertTagToStyle extends Plugin {
 		}, { priority: 'high' } );
 	}
 }
-

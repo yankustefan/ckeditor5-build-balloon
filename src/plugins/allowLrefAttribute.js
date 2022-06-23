@@ -29,7 +29,7 @@ export default class allowLrefAttribute extends Plugin {
 				return writer.createAttributeElement( 'span', {
 						'data-lref': `${ modelAttributeValue }`
 					},
-					{ priority: 11 }
+					// { priority: 11 }
 				);
 			},
 			converterPriority: 'high'
@@ -37,4 +37,3 @@ export default class allowLrefAttribute extends Plugin {
 
 	}
 }
-

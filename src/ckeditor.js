@@ -30,11 +30,17 @@ import SpecialCharactersMathematical from '@ckeditor/ckeditor5-special-character
 import SpecialCharactersLatin from '@ckeditor/ckeditor5-special-characters/src/specialcharacterslatin';
 import SpecialCharactersText from '@ckeditor/ckeditor5-special-characters/src/specialcharacterstext';
 
-import wrapTextInSpan from './plugins/wrapTextInSpan.js';
 import textColorButtons from './plugins/textColorButtons.js';
-import convertTagToStyle from './plugins/convertTagToStyle';
-import handleStyles from './plugins/handleStyles';
-import allowLrefAttribute from './plugins/allowLrefAttribute';
+// import wrapTextInSpan from './plugins/wrapTextInSpan.js';
+// import convertTagToStyle from './plugins/convertTagToStyle';
+// import handleStyles from './plugins/handleStyles';
+// import allowLrefAttribute from './plugins/allowLrefAttribute';
+import { Lref } from './plugins/lref';
+import { LineHeight } from './plugins/lineheight';
+import { LetterSpacing } from './plugins/letterspacing';
+import { TextTransform } from './plugins/texttransform';
+import { OverrideStyles } from './plugins/overridestyles';
+import { TextSpan } from './plugins/textspan.js';
 
 function generateFontSizes() {
 	let sizes = [];
@@ -78,11 +84,17 @@ BalloonEditor.builtinPlugins = [
 	SpecialCharactersMathematical,
 	SpecialCharactersLatin,
 	SpecialCharactersText,
-	convertTagToStyle,
-	handleStyles,
+	// convertTagToStyle,
+	// handleStyles,
+	// wrapTextInSpan,
+	// allowLrefAttribute,
 	textColorButtons,
-	wrapTextInSpan,
-	allowLrefAttribute
+	Lref,
+	LineHeight,
+	LetterSpacing,
+	TextTransform,
+	TextSpan,
+	OverrideStyles,
 ];
 
 // Editor configuration.
