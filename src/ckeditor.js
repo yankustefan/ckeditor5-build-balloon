@@ -42,25 +42,25 @@ import { TextTransform } from './plugins/texttransform';
 import { OverrideStyles } from './plugins/overridestyles';
 import { TextSpan } from './plugins/textspan.js';
 
-function generateFontSizes() {
-	let sizes = [];
-	while (sizes.length < 100) {
-		const size = sizes.length + 1;
-		sizes.push( {
-			model: size,
-			title: size,
-			view: {
-				name: 'span',
-				styles: {
-					'font-size': `${ size }pt`
-				}
-			}
-		} );
-	}
+// function generateFontSizes() {
+// 	let sizes = [];
+// 	while (sizes.length < 100) {
+// 		const size = sizes.length + 1;
+// 		sizes.push( {
+// 			model: size,
+// 			title: size,
+// 			view: {
+// 				name: 'span',
+// 				styles: {
+// 					'font-size': `${ size }pt`
+// 				}
+// 			}
+// 		} );
+// 	}
 
-	return sizes;
+// 	return sizes;
 
-}
+// }
 
 export default class BalloonEditor extends BalloonEditorBase {
 }
@@ -128,8 +128,11 @@ BalloonEditor.defaultConfig = {
 			'redo'
 		]
 	},
-	fontSize: {
-		options: generateFontSizes()
+	// fontSize: {
+	// 	options: generateFontSizes()
+	// },
+	fontFamily: {
+		supportAllValues: true
 	},
 	// This value must be kept in sync with the language defined in webpack.config.js.
 	language: 'en'
