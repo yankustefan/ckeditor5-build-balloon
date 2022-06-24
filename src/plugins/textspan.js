@@ -58,20 +58,16 @@ function textInsertPostFixer(writer, document) {
         ) {
 
             const { textNode, nodeBefore, nodeAfter } = entry.position;
-            let insertedText;
+            let insertedTextNode;
 
             if (textNode) {
-                insertedText = textNode;
+                insertedTextNode = textNode;
             } else if (isTextLikeNode(nodeBefore)) {
-                insertedText = nodeBefore;
+                insertedTextNode = nodeBefore;
             } else if (isTextLikeNode(nodeAfter)) {
-                insertedText = nodeAfter;
+                insertedTextNode = nodeAfter;
             }
-            
-            if (insertedText && hasNoAttributes(insertedText)) {
-                writer.setAttribute(TEXT_SPAN, true, insertedText);
-                wasChanged = true;
-            }
+            wasChanged = setTextSpanAttribute(insertedTextNode, writer);
         }
     }
     return wasChanged;

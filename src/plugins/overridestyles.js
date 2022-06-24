@@ -190,12 +190,12 @@ class OverrideStylesEditing extends Plugin {
         conversion.for('downcast').attributeToElement({
             model: 'superscript',
             view: (modelAttributeValue, conversionApi) => {
-        const { writer } = conversionApi;
-        return writer.createAttributeElement(
-            'span',
-            { style: 'vertical-align: super' },
-            { priority: PRIORITY }
-        );
+                const { writer } = conversionApi;
+                return writer.createAttributeElement(
+                    'span',
+                    { style: 'vertical-align: super' },
+                    { priority: PRIORITY }
+                );
             },
             converterPriority: 'high'
         });
