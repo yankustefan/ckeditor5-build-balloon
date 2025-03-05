@@ -113,6 +113,7 @@ BalloonEditor.defaultConfig = {
 			'taFontColorYellowGreen',
 			'taFontColorSky',
 			'taFontColorPink',
+			'taFontColorDarkMagenta',
 			'taFontColorRemove',
 			'|',
 			'specialCharacters',

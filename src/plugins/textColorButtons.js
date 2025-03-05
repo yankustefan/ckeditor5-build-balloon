@@ -46,7 +46,12 @@ export default class textColorButtons extends Plugin {
 				// key: 'taFontColorBlack',
 				// name: 'Black',
 				// value: '#cc0000'
-			}
+			},
+			{
+				key: 'taFontColorDarkMagenta',
+				name: 'Dark Magenta',
+				value: '#8b008b'
+			},
 		];
 
 		const fontColorCommand = 'fontColor';
